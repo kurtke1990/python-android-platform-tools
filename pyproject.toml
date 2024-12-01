@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "python-android-platform-tools"
+version = "0.1.0"
+dependencies = []
+requires-python = ">=3.10"
+authors = [
+    {name = "Kurt Ke", email = "kurtke1990@gmail.com"},
+]
+description = "This is a python package to interact with the Android platform tools"
+readme = "README.md"
+
+[dependency-groups]
+dev = [
+    "pytest-cov==6.0.0",
+    "pytest==8.3.3",
+    "ruff==0.8.1",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib", "-svvv", "--cov=.", "test", "--cov-report","term-missing"]
