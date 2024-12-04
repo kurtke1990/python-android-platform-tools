@@ -28,6 +28,11 @@ def get_attached_devices(show_details: bool = False) -> dict:
     return ret
 
 
+def wait_for_device_attached(udid: str):
+    cmd = "wait-for-device"
+    execute_command(cmd, udid=udid, is_adb_shell=False, timeout=3)
+
+
 def _get_udid(detail: str) -> str | None:
     return search_by_pattern(detail, r"^([\w\-_?!*+&!#@%$:\(\)~;\/.]{1,})\s{1,}", 1)
 
