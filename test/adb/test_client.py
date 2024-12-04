@@ -1,4 +1,9 @@
+from subprocess import TimeoutExpired
+
+import pytest
+
 from python_android_platform_tools.adb import client
+from python_android_platform_tools.exception import ADBCommandTimeoutException
 
 attached_devices_output = """List of devices attached
 98201FFAZ001P4         device
@@ -89,3 +94,28 @@ def test_get_attached_devices_without_details(subprocess_run_stub):
         encoding="utf-8",
         capture_output=True,
     )
+
+
+def test_wait_for_device_attached(subprocess_run_stub):
+    run_stub = subprocess_run_stub("", "", 0)
+    udid = "udid"
+    client.wait_for_device_attached(udid)
+    run_stub.assert_called_with(
+        f"adb -s {udid} wait-for-device",
+        timeout=3,
+        shell=True,
+        check=False,
+        encoding="utf-8",
+        capture_output=True,
+    )
+
+
+def test_wait_for_device_attached_but_timeout(subprocess_run_stub):
+    udid = "udid"
+    cmd = f"adb -s {udid} wait-for-device"
+    timeout = 3
+    subprocess_run_stub("", "", 1, TimeoutExpired(cmd, timeout))
+    with pytest.raises(
+        ADBCommandTimeoutException, match=f"Command {cmd!r} timed out after {timeout} seconds."
+    ):
+        client.wait_for_device_attached(udid)
