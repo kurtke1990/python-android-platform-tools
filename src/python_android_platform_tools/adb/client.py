@@ -2,7 +2,7 @@ from python_android_platform_tools.adb.common import execute_command
 from python_android_platform_tools.lib import search_by_pattern
 
 
-def get_attached_devices(show_details: bool = False) -> dict:
+def get_attached_devices(show_details: bool = False) -> list[dict[str, str | None]]:
     """
     Get all attached android devices.
 
