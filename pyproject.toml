@@ -29,4 +29,4 @@ indent-style = "space"
 docstring-code-format = true
 
 [tool.pytest.ini_options]
-addopts = ["--import-mode=importlib", "-svvv", "--cov=.", "test", "--cov-report","term-missing"]
+addopts = ["--import-mode=importlib", "-svvv", "--cov=src", "test", "--cov-report","term-missing"]
