@@ -4,11 +4,23 @@ from python_android_platform_tools.lib import search_by_pattern
 
 def get_attached_devices(show_details: bool = False) -> list[dict[str, str | None]]:
     """
-    Get all attached android devices.
+    Retrieve a list of attached Android devices with optional detailed information.
 
-    :param show_details: if True, the product, model, transport_id etc will be listed the return value. if False, these won't be shown in the return value.
+    :param show_details: If True, include detailed information about each device.
+                         If False, only include basic information (default: False).
     :type show_details: bool
+    :return: A list of dictionaries, each containing information about an attached device.
+             The dictionary keys include:
+             - "udid": The unique device identifier.
+             - "state": The state of the device (e.g., device, offline).
+             - "connected_usb" (optional): The USB port to which the device is connected.
+             - "product" (optional): The product name of the device.
+             - "model" (optional): The model name of the device.
+             - "device_architecture" (optional): The architecture of the device.
+             - "transport_id" (optional): The transport ID of the device.
+    :rtype: list[dict[str, str | None]]
     """
+
     cmd = "devices -l" if show_details else "devices"
     stdout, *_ = execute_command(cmd, is_adb_shell=False)
     ret = []
@@ -28,7 +40,16 @@ def get_attached_devices(show_details: bool = False) -> list[dict[str, str | Non
     return ret
 
 
-def wait_for_device_attached(udid: str):
+def wait_for_device_attached(udid: str) -> None:
+    """
+    Waits for an Android device to be attached.
+    This function sends a command to wait for an Android device with the specified unique device identifier (UDID) to be attached.
+    It uses the ADB (Android Debug Bridge) command `wait-for-device` to achieve this.
+
+    :param udid: The unique device identifier of the Android device.
+    :type udid: str
+    """
+
     cmd = "wait-for-device"
     execute_command(cmd, udid=udid, is_adb_shell=False, timeout=3)
 
