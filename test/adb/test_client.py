@@ -118,4 +118,4 @@ def test_wait_for_device_attached_but_timeout(subprocess_run_stub):
     with pytest.raises(
         ADBCommandTimeoutException, match=f"Command {cmd!r} timed out after {timeout} seconds."
     ):
-        client.wait_for_device_attached(udid)
+        client.wait_for_device_attached(udid, timeout)

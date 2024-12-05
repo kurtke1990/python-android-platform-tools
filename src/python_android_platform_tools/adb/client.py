@@ -40,7 +40,7 @@ def get_attached_devices(show_details: bool = False) -> list[dict[str, str | Non
     return ret
 
 
-def wait_for_device_attached(udid: str) -> None:
+def wait_for_device_attached(udid: str, timeout: int | float = 3.0) -> None:
     """
     Waits for an Android device to be attached.
     This function sends a command to wait for an Android device with the specified unique device identifier (UDID) to be attached.
@@ -48,10 +48,13 @@ def wait_for_device_attached(udid: str) -> None:
 
     :param udid: The unique device identifier of the Android device.
     :type udid: str
+    :param timeout: The maximum time to wait for the device to be attached (default: 3.0 seconds).
+    :type timeout: int | float
+    :raises ADBCommandTimeoutException: If the command times out.
     """
 
     cmd = "wait-for-device"
-    execute_command(cmd, udid=udid, is_adb_shell=False, timeout=3)
+    execute_command(cmd, udid=udid, is_adb_shell=False, timeout=timeout)
 
 
 def _get_udid(detail: str) -> str | None:
