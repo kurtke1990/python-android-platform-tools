@@ -20,3 +20,18 @@ def subprocess_run_stub(monkeypatch):
         return run_stub
 
     return prepare
+
+
+@pytest.fixture
+def assert_subprocess_run_called_with():
+    def assert_called_with(run_stub, cmd, timeout: int | float = 1.0):
+        run_stub.assert_called_once_with(
+            cmd,
+            timeout=timeout,
+            shell=True,
+            check=False,
+            encoding="utf-8",
+            capture_output=True,
+        )
+
+    return assert_called_with
