@@ -16,10 +16,11 @@ no_devices_attached_output = """List of devices attached
 """
 
 
-def test_get_attached_devices(subprocess_run_stub):
+def test_get_attached_devices(subprocess_run_stub, assert_subprocess_run_called_with):
     run_stub = subprocess_run_stub(
         stdout=attached_devices_output_w_details, stderr="", returncode=0
     )
+    cmd = "adb devices -l"
     assert client.get_attached_devices(show_details=True) == [
         {
             "udid": "98201FFAZ001P4",
@@ -49,14 +50,7 @@ def test_get_attached_devices(subprocess_run_stub):
             "transport_id": None,
         },
     ]
-    run_stub.assert_called_once_with(
-        "adb devices -l",
-        timeout=1.0,
-        shell=True,
-        check=False,
-        encoding="utf-8",
-        capture_output=True,
-    )
+    assert_subprocess_run_called_with(run_stub, cmd)
 
 
 def test_no_attached_devices(subprocess_run_stub):
@@ -64,8 +58,11 @@ def test_no_attached_devices(subprocess_run_stub):
     assert client.get_attached_devices(show_details=True) == []
 
 
-def test_get_attached_devices_without_details(subprocess_run_stub):
+def test_get_attached_devices_without_details(
+    subprocess_run_stub, assert_subprocess_run_called_with
+):
     run_stub = subprocess_run_stub(stdout=attached_devices_output, stderr="", returncode=0)
+    cmd = "adb devices"
     assert client.get_attached_devices(show_details=False) == [
         {
             "udid": "98201FFAZ001P4",
@@ -80,12 +77,4 @@ def test_get_attached_devices_without_details(subprocess_run_stub):
             "state": "unauthorized",
         },
     ]
-
-    run_stub.assert_called_once_with(
-        "adb devices",
-        timeout=1.0,
-        shell=True,
-        check=False,
-        encoding="utf-8",
-        capture_output=True,
-    )
+    assert_subprocess_run_called_with(run_stub, cmd)
