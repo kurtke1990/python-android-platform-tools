@@ -25,7 +25,7 @@ repos:
     hooks:
       - id: pytest
         name: unit-test
-        entry: uv run pytest
+        entry: pytest test
         language: python
         pass_filenames: false # no filenames will be passed to the hook.
         always_run: true
