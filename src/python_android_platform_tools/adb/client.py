@@ -1,4 +1,4 @@
-from python_android_platform_tools.adb.common import execute_command
+from python_android_platform_tools.adb.common import State, Transport, execute_command
 from python_android_platform_tools.lib import search_by_pattern
 
 
@@ -40,20 +40,8 @@ def get_attached_devices(show_details: bool = False) -> list[dict[str, str | Non
     return ret
 
 
-def wait_for_device_attached(udid: str, timeout: int | float = 3.0) -> None:
-    """
-    Waits for an Android device to be attached.
-    This function sends a command to wait for an Android device with the specified unique device identifier (UDID) to be attached.
-    It uses the ADB (Android Debug Bridge) command `wait-for-device` to achieve this.
-
-    :param udid: The unique device identifier of the Android device.
-    :type udid: str
-    :param timeout: The maximum time to wait for the device to be attached (default: 3.0 seconds).
-    :type timeout: int | float
-    :raises ADBCommandTimeoutException: If the command times out.
-    """
-
-    cmd = "wait-for-device"
+def wait_for(transport: Transport, state: State, udid: str = "", timeout: int | float = 3) -> None:
+    cmd = f"wait-for-{transport.value}-{state.value}"
     execute_command(cmd, udid=udid, is_adb_shell=False, timeout=timeout)
 
 
