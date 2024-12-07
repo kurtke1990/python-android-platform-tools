@@ -1,8 +1,10 @@
+from itertools import product
 from subprocess import TimeoutExpired
 
 import pytest
 
 from python_android_platform_tools.adb import client
+from python_android_platform_tools.adb.common import State, Transport
 from python_android_platform_tools.exception import ADBCommandTimeoutException
 
 attached_devices_output = """List of devices attached
@@ -85,20 +87,28 @@ def test_get_attached_devices_without_details(
     assert_subprocess_run_called_with(run_stub, cmd)
 
 
-def test_wait_for_device_attached(subprocess_run_stub, assert_subprocess_run_called_with):
+@pytest.mark.parametrize(
+    "state, transport",
+    list(product(list(Transport), list(State))),
+    ids=lambda param: param.value,  # make test case name look better
+)
+def test_wait_for(state, transport, subprocess_run_stub, assert_subprocess_run_called_with):
+    cmd = f"adb wait-for-{transport.value}-{state.value}"
     run_stub = subprocess_run_stub("", "", 0)
-    udid = "udid"
-    cmd = f"adb -s {udid} wait-for-device"
-    client.wait_for_device_attached(udid)
+    client.wait_for(transport, state)
     assert_subprocess_run_called_with(run_stub, cmd, timeout=3)
 
 
-def test_wait_for_device_attached_but_timeout(subprocess_run_stub):
-    udid = "udid"
-    cmd = f"adb -s {udid} wait-for-device"
+@pytest.mark.parametrize(
+    "state, transport",
+    list(product(list(Transport), list(State))),
+    ids=lambda param: param.value,  # make test case name look better
+)
+def test_wait_for_but_timedout(state, transport, subprocess_run_stub):
+    cmd = f"adb wait-for-{transport.value}-{state.value}"
     timeout = 3
     subprocess_run_stub("", "", 1, TimeoutExpired(cmd, timeout))
     with pytest.raises(
         ADBCommandTimeoutException, match=f"Command {cmd!r} timed out after {timeout} seconds."
     ):
-        client.wait_for_device_attached(udid, timeout)
+        client.wait_for(transport, state)

@@ -1,10 +1,26 @@
 import subprocess
+from enum import Enum
 
 from python_android_platform_tools.exception import (
     ADBCommandInvocationException,
     ADBCommandTimeoutException,
 )
 from python_android_platform_tools.lib import remove_empty_strings
+
+
+class Transport(Enum):
+    USB = "usb"
+    LOCAL = "local"
+    ANY = "any"
+
+
+class State(Enum):
+    DEVICE = "device"
+    RECOVERY = "recovery"
+    RESCUE = "rescue"
+    SIDELOAD = "sideload"
+    BOOTLOADER = "bootloader"
+    DISCONNECT = "disconnect"
 
 
 def execute_command(
