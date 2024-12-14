@@ -1,4 +1,5 @@
 from python_android_platform_tools.adb.common import State, Transport, execute_command
+from python_android_platform_tools.exception import ADBCommandInvocationException
 from python_android_platform_tools.lib import search_by_pattern
 
 
@@ -43,6 +44,15 @@ def get_attached_devices(show_details: bool = False) -> list[dict[str, str | Non
 def wait_for(transport: Transport, state: State, udid: str = "", timeout: int | float = 3) -> None:
     cmd = f"wait-for-{transport.value}-{state.value}"
     execute_command(cmd, udid=udid, is_adb_shell=False, timeout=timeout)
+
+
+def grant_root_permission(udid: str = "") -> None:
+    cmd = "root"
+    stdout, *rest = execute_command(cmd, is_adb_shell=False, udid=udid, timeout=3)
+    if stdout.strip() == "adbd cannot run as root in production builds":
+        raise ADBCommandInvocationException(
+            "Failed to grant the root permission to device since the target device is running with the production build."
+        )
 
 
 def _get_udid(detail: str) -> str | None:

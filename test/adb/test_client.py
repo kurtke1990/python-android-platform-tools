@@ -5,7 +5,10 @@ import pytest
 
 from python_android_platform_tools.adb import client
 from python_android_platform_tools.adb.common import State, Transport
-from python_android_platform_tools.exception import ADBCommandTimeoutException
+from python_android_platform_tools.exception import (
+    ADBCommandInvocationException,
+    ADBCommandTimeoutException,
+)
 
 attached_devices_output = """List of devices attached
 98201FFAZ001P4         device
@@ -112,3 +115,20 @@ def test_wait_for_but_timedout(state, transport, subprocess_run_stub):
         ADBCommandTimeoutException, match=f"Command {cmd!r} timed out after {timeout} seconds."
     ):
         client.wait_for(transport, state)
+
+
+@pytest.mark.parametrize(
+    "adb_root_succeed_output", ["restarting adbd as root", "adbd is already running as root"]
+)
+def test_grant_root_permission_successfully(adb_root_succeed_output, subprocess_run_stub):
+    subprocess_run_stub(adb_root_succeed_output, "", 0)
+    client.grant_root_permission()
+
+
+def test_grant_root_permission_but_device_runs_production_build(subprocess_run_stub):
+    subprocess_run_stub("adbd cannot run as root in production builds", "", 0)
+    with pytest.raises(
+        ADBCommandInvocationException,
+        match="Failed to grant the root permission to device since the target device is running with the production build.",
+    ):
+        client.grant_root_permission()
