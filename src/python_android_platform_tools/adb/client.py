@@ -41,20 +41,6 @@ def get_attached_devices(show_details: bool = False) -> list[dict[str, str | Non
     return ret
 
 
-def wait_for(transport: Transport, state: State, udid: str = "", timeout: int | float = 3) -> None:
-    cmd = f"wait-for-{transport.value}-{state.value}"
-    execute_command(cmd, udid=udid, is_adb_shell=False, timeout=timeout)
-
-
-def grant_root_permission(udid: str = "") -> None:
-    cmd = "root"
-    stdout, *rest = execute_command(cmd, is_adb_shell=False, udid=udid, timeout=3)
-    if stdout.strip() == "adbd cannot run as root in production builds":
-        raise ADBCommandInvocationException(
-            "Failed to grant the root permission to device since the target device is running with the production build."
-        )
-
-
 def _get_udid(detail: str) -> str | None:
     return search_by_pattern(detail, r"^([\w\-_?!*+&!#@%$:\(\)~;\/.]{1,})\s{1,}", 1)
 
@@ -81,3 +67,46 @@ def _get_device_arch(detail: str) -> str | None:
 
 def _get_transport_id(detail: str) -> str | None:
     return search_by_pattern(detail, r"(transport_id:)(\d+)", group_num=2)
+
+
+def wait_for(transport: Transport, state: State, udid: str = "", timeout: int | float = 3) -> None:
+    cmd = f"wait-for-{transport.value}-{state.value}"
+    execute_command(cmd, udid=udid, is_adb_shell=False, timeout=timeout)
+
+
+def grant_root_permission(udid: str = "") -> None:
+    cmd = "root"
+    stdout, *rest = execute_command(cmd, is_adb_shell=False, udid=udid, timeout=3)
+    if stdout.strip() == "adbd cannot run as root in production builds":
+        raise ADBCommandInvocationException(
+            "Failed to grant the root permission to device since the target device is running with the production build."
+        )
+
+
+def get_all_properties(udid: str = "") -> dict[str, str | bool | None]:
+    cmd = "getprop"
+    stdout, *rest = execute_command(cmd, udid=udid, timeout=3)
+    ret = {}
+    for prop_info in stdout.splitlines():
+        prop_key = _get_property_key(prop_info.strip())
+        if prop_key is None:
+            continue
+        prop_value = _get_property_value(prop_info.strip())
+        ret[prop_key] = prop_value
+    return ret
+
+
+def _get_property_key(prop_info: str) -> str | None:
+    return search_by_pattern(prop_info, r"\[(.*)\]\:\s\[(.*)\]", 1)
+
+
+def _get_property_value(prop_info: str) -> str | bool | None:
+    prop_value = search_by_pattern(prop_info, r"\[(.*)\]\:\s\[(.*)\]", 2)
+    if prop_value is None or not len(prop_value):
+        return None
+    elif prop_value == "true":
+        return True
+    elif prop_value == "false":
+        return False
+    else:
+        return prop_value
