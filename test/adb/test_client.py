@@ -158,3 +158,18 @@ def test_get_all_properties(subprocess_run_stub):
         "gsm.operator.isroaming": False,
         "persist.sys.boot.reason": None,
     }
+
+
+def test_connect_device_wirelessly(subprocess_run_stub):
+    host = "192.168.0.1"
+    port = 5555
+    subprocess_run_stub(f"connected to {host}:{port}", "", 0)
+    client.connect_device_wirelessly(host, port)
+
+
+def test_connect_device_wirelessly_but_timedout(subprocess_run_stub):
+    host = "192.168.0.1"
+    port = 5555
+    subprocess_run_stub(f"failed to connect to '{host}:{port}': Operation timed out", "", 0)
+    with pytest.raises(ADBCommandTimeoutException):
+        client.connect_device_wirelessly(host, port)

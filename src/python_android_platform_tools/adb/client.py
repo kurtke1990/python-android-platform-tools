@@ -1,5 +1,8 @@
 from python_android_platform_tools.adb.common import State, Transport, execute_command
-from python_android_platform_tools.exception import ADBCommandInvocationException
+from python_android_platform_tools.exception import (
+    ADBCommandInvocationException,
+    ADBCommandTimeoutException,
+)
 from python_android_platform_tools.lib import search_by_pattern
 
 
@@ -110,3 +113,12 @@ def _get_property_value(prop_info: str) -> str | bool | None:
         return False
     else:
         return prop_value
+
+
+def connect_device_wirelessly(host: str, port: int = 5555) -> None:
+    cmd = f"connect {host}:{port}"
+    stdout, stderr, returncode = execute_command(cmd)
+    if "Operation timed out" in stdout:
+        raise ADBCommandTimeoutException(
+            "Unable to connect the device wirelessly since it timed out."
+        )
